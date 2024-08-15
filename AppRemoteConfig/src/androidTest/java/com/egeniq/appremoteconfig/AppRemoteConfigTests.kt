@@ -7,11 +7,6 @@ import org.junit.Assert.*
 import org.junit.runner.RunWith
 import java.util.Date
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class AppRemoteConfigTests {
 
@@ -103,6 +98,227 @@ class AppRemoteConfigTests {
         val bar = settings["bar"] as String
         assertEquals("hello world", bar)
     }
+
+    @Test
+    fun overridingWithAppVersion() {
+    val jsonString = """
+    {
+        "settings": {
+            "foo": 1
+        },
+        "overrides": [
+            {
+                "matching": [
+                    {
+                        "appVersion": "1.0.0"
+                    }
+                ],
+                "settings": {
+                    "foo": 2
+                }
+            }
+        ]
+    }
+    """
+    val json = JSONObject(jsonString)
+
+    val date = Date(0)
+    val config = Config(json)
+    val settings = config.resolve(
+        date = date,
+        platform = Platform.iOS_iPhone,
+        platformVersion = OperatingSystemVersion(16, 0, 1),
+        appVersion = Version("1.0.0"),
+        buildVariant = BuildVariant.RELEASE
+    )
+
+    val foo = settings.getInt("foo")
+    assertEquals(2, foo)
+}
+
+    @Test
+    fun overridingWithAppVersionRange() {
+    val jsonString = """
+    {
+        "settings": {
+            "foo": 1
+        },
+        "overrides": [
+            {
+                "matching": [
+                    {
+                        "appVersion": "0.7.0-1.0.0"
+                    }
+                ],
+                "settings": {
+                    "foo": 2
+                }
+            }
+        ]
+    }
+    """
+    val json = JSONObject(jsonString)
+
+    val date = Date(0)
+    val config = Config(json)
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.6.9"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.7.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(2, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.8.123"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(2, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(2, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.1"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+}
+
+    @Test
+    fun overridingWithMultipleOverrides() {
+    val jsonString = """
+    {
+        "settings": {
+            "foo": 1
+        },
+        "overrides": [
+            {
+                "matching": [
+                    {
+                        "appVersion": "0.7.0-1.0.0"
+                    }
+                ],
+                "settings": {
+                    "foo": 2
+                }
+            },
+            {
+                "matching": [
+                    {
+                        "appVersion": "1.0.0"
+                    }
+                ],
+                "settings": {
+                    "foo": 3
+                }
+            }
+        ]
+    }
+    """
+    val json = JSONObject(jsonString)
+
+    val date = Date(0)
+    val config = Config(json)
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.6.9"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.7.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(2, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("0.8.123"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(2, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(3, foo)
+    }
+
+    runCatching {
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.1"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+}
 
     @Test
     fun versionParsing() {

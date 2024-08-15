@@ -18,20 +18,12 @@ data class Schedule(
         from = null,
         until = null
     ) {
-        val fromJSON: Any? = json["from"]
-        if (fromJSON != null) {
-            val fromString = fromJSON as? String
-            if (fromString != null) {
+        if (json.has("from")) {
+            try {
+                val fromString = json.getString("from")
                 val date = dateFormatter.parse(fromString)
-                if (date != null) {
-                    from = date
-                }  else {
-                    matchNever = true
-                    from = null
-                    until = null
-                    return
-                }
-            } else {
+                from = date
+            } catch (e: Exception) {
                 matchNever = true
                 from = null
                 until = null
@@ -41,19 +33,12 @@ data class Schedule(
             from = null
         }
 
-        val untilJSON: Any? = json["until"]
-        if (untilJSON != null) {
-            val untilString = untilJSON as? String
-            if (untilString != null) {
-                val date = dateFormatter.parse(untilString)
-                if (date != null) {
-                    until = date
-                } else {
-                    matchNever = true
-                    until = null
-                    return
-                }
-            } else {
+        if (json.has("until")) {
+            try {
+                val fromString = json.getString("until")
+                val date = dateFormatter.parse(fromString)
+                until = date
+            } catch (e: Exception) {
                 matchNever = true
                 until = null
                 return
@@ -69,7 +54,6 @@ data class Schedule(
         if (matchNever) {
             return false
         }
-
         if (from != null && date.compareTo(from) < 0) {
             return false
         }

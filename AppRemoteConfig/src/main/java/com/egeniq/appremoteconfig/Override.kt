@@ -9,7 +9,7 @@ data class Override(
 ) {
     constructor(json: JSONObject) : this(
         conditions = json.getJSONArray("matching")?.toList { Condition(it as JSONObject) },
-//        schedule = json.getJSONObject("schedule")?.let { Schedule(it as JSONObject) },
+        schedule = if (json.has("schedule")) Schedule(json.getJSONObject("schedule")) else null,
         settings = json.getJSONObject("settings")
     )
 }

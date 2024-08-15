@@ -1,5 +1,6 @@
 package com.egeniq.appremoteconfig
 
+import kotlinx.coroutines.joinAll
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -35,9 +36,9 @@ class Config(
 ) {
     constructor(json: JSONObject) : this(
         settings = json.getJSONObject("settings"),
-        deprecatedKeys = json.getJSONArray("deprecatedKeys")?.toList { it as String } ?: emptyList(),
+        deprecatedKeys = if (json.has("deprecatedKeys")) json.getJSONArray("deprecatedKeys")?.toList { it as String } ?: emptyList() else emptyList(),
         overrides = json.getJSONArray("overrides")?.toList { Override(it as JSONObject) } ?: emptyList(),
-        meta = json.getJSONObject("meta") ?: JSONObject()
+        meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
     )
 
 //    init {
@@ -87,12 +88,10 @@ class Config(
             }
 
             if (isScheduled && matches) {
-                //   partialResult.merge(override.settings) { _, override in override }
-                val merged = partialResult
                 for (key in override.settings.keys()) {
-                    merged.put(key, override.settings.get(key))
+                    partialResult.put(key, override.settings.get(key))
                 }
-                merged // .plus(override.settings)
+                partialResult
             } else {
                 partialResult
             }

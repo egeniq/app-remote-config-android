@@ -5,10 +5,15 @@ import org.json.JSONObject
 import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.RunWith
+import java.text.SimpleDateFormat
 import java.util.Date
 
 @RunWith(AndroidJUnit4::class)
 class AppRemoteConfigTests {
+
+    companion object {
+        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
+    }
 
     @Test
     fun parsing() {
@@ -450,4 +455,87 @@ class AppRemoteConfigTests {
     } catch (e: Exception) {
         e.printStackTrace()
     }
-}                                                                                                                                                                                                                              }
+    }
+
+    @Test
+    fun notMatchingWhenUnknownKeysArePresent() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "1.0.0",
+                            "unknownKey": "present"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val date = Date(0)
+        val config = Config(json)
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+@Test
+fun relevantDates() {
+    val jsonString = """
+    {
+        "settings": {
+            "foo": 1
+        },
+        "overrides": [
+            {
+                "matching": [
+                    {
+                        "appVersion": "1.0.0"
+                    }
+                ],
+                "schedule": {
+                    "from": "2024-08-21T00:00:00Z",
+                    "until": "2024-09-11T00:00:00Z"
+                },
+                "settings": {
+                    "foo": 2
+                }
+            }
+        ]
+    }
+    """
+    val json = JSONObject(jsonString)
+
+    val date = Date(0)
+    val config = Config(json)
+    val dates = config.relevantResolutionDates(
+        platform = Platform.iOS_iPhone,
+        platformVersion = OperatingSystemVersion(16, 0, 1),
+        appVersion = Version("1.0.0"),
+        buildVariant = BuildVariant.RELEASE
+    )
+
+    val expectedDates = listOf(
+        dateFormatter.parse("2024-08-21T00:00:00Z"),
+        dateFormatter.parse("2024-09-11T00:00:00Z")
+    )
+
+    assertEquals(expectedDates, dates)
+}
+}

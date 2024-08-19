@@ -1,16 +1,18 @@
 package com.egeniq.appremoteconfig
 import android.annotation.SuppressLint
+import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
 import java.util.*
 import org.json.JSONObject
 
+@Serializable
 data class Schedule(
     var matchNever: Boolean,
-    var from: Date?,
-    var until: Date?
+    var from: Instant?,
+    var until: Instant?
 ) {
     companion object {
-        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
     }
 
     constructor(json: JSONObject) : this(

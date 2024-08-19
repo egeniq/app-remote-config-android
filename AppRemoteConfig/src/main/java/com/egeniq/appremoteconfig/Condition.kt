@@ -18,7 +18,7 @@ data class Condition(
     val language: String?
 ) {
     constructor(json: JSONObject) : this(
-        matchNever = false, // TODO json.keys().any { !listOf("platform", "platformVersion", "appVersion", "variant", "buildVariant", "language").contains(it) },
+        matchNever = json.keys().asSequence().any { key -> !listOf("platform", "platformVersion", "appVersion", "variant", "buildVariant", "language").contains(key) },
         platform = if (json.has("platform")) json.getString("platform").let { platform -> Platform.entries.firstOrNull { it.value == platform } } ?: Platform.unknown else null,
         platformVersion = if (json.has("platformVersion")) json.getString("platformVersion").let { VersionRange.fromRawValue(it) } else null,
         appVersion = if (json.has("appVersion")) json.getString("appVersion").let { VersionRange.fromRawValue(it) } else null,

@@ -3,6 +3,7 @@ package com.egeniq.appremoteconfig
 import kotlinx.coroutines.joinAll
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.*
 
 fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
@@ -40,6 +41,7 @@ class Config(
         overrides = json.getJSONArray("overrides")?.toList { Override(it as JSONObject) } ?: emptyList(),
         meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
     )
+
 
 //    init {
 //        json["settings"]?.let { jsonValue ->
@@ -98,7 +100,6 @@ class Config(
         }
     }
 
-    /*
     fun relevantResolutionDates(
         platform: Platform,
         platformVersion: OperatingSystemVersion,
@@ -107,7 +108,8 @@ class Config(
         buildVariant: BuildVariant,
         language: String? = null
     ): List<Date> {
-        return overrides.fold(emptyList()) { partialResult, override ->
+        var dates: List<Date> = emptyList()
+        return overrides.fold(dates) { partialResult, override ->
             if (override.schedule != null) {
                 val matches: Boolean = if (override.conditions != null) {
                     override.conditions.any { condition ->
@@ -144,5 +146,4 @@ class Config(
         }
             .sorted()
     }
-    */
 }

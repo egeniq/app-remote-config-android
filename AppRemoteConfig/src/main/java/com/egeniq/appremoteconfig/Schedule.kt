@@ -5,11 +5,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import org.json.JSONObject
 
-@Serializable
+//@Serializable
 data class Schedule(
     var matchNever: Boolean,
-    var from: Instant?,
-    var until: Instant?
+    var from: Date?,
+    var until: Date?
 ) {
     companion object {
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!

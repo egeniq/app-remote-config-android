@@ -1,13 +1,11 @@
 package com.egeniq.appremoteconfig
 
-import com.egeniq.appremoteconfig.Version.Companion.parseVersion
-import java.lang.IllegalArgumentException
-
 sealed class VersionRange {
     data class Equal(val version: Version) : VersionRange()
     data class LesserThan(val version: Version, val inclusive: Boolean) : VersionRange()
     data class GreaterThan(val version: Version, val inclusive: Boolean) : VersionRange()
-    data class Between(val lower: Pair<Version, Boolean>, val upper: Pair<Version, Boolean>) : VersionRange()
+    data class Between(val lower: Pair<Version, Boolean>, val upper: Pair<Version, Boolean>) :
+        VersionRange()
 
     fun contains(other: Version): Boolean {
         return when (this) {
@@ -22,6 +20,7 @@ sealed class VersionRange {
                     else -> other >= lower.first && other <= upper.first
                 }
             }
+
             else -> {
                 throw ConfigError.InvalidVersionRange()
             }
@@ -62,6 +61,7 @@ sealed class VersionRange {
                         upper = Pair(upperVersion, upperIncluded)
                     )
                 }
+
                 1 -> {
                     val part = parts[0]
                     return when {
@@ -96,6 +96,7 @@ sealed class VersionRange {
                         }
                     }
                 }
+
                 else -> {
                     throw ConfigError.InvalidVersionRange()
                 }

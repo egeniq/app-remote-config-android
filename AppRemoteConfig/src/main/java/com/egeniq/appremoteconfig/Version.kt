@@ -3,7 +3,10 @@ package com.egeniq.appremoteconfig
 data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
     override fun compareTo(other: Version): Int {
         return when {
-            canonical.first == other.canonical.first && canonical.second == other.canonical.second -> canonical.third.compareTo(other.canonical.third)
+            canonical.first == other.canonical.first && canonical.second == other.canonical.second -> canonical.third.compareTo(
+                other.canonical.third
+            )
+
             canonical.first == other.canonical.first -> canonical.second.compareTo(other.canonical.second)
             else -> canonical.first.compareTo(other.canonical.first)
         }
@@ -24,7 +27,13 @@ data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
 
     constructor(rawValue: String) : this(parseVersion(rawValue))
 
-    constructor(version: OperatingSystemVersion) : this(Triple(version.majorVersion, version.minorVersion, version.patchVersion))
+    constructor(version: OperatingSystemVersion) : this(
+        Triple(
+            version.majorVersion,
+            version.minorVersion,
+            version.patchVersion
+        )
+    )
 
     val operatingSystemVersion: OperatingSystemVersion
         get() = OperatingSystemVersion(canonical.first, canonical.second, canonical.third)

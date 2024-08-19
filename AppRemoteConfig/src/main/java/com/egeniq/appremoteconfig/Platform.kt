@@ -1,27 +1,27 @@
 package com.egeniq.appremoteconfig
 
 enum class Platform(val value: String) {
-    iOS("iOS"),
-    iOS_iPhone("iOS.iPhone"),
-    iOS_iPad("iOS.iPad"),
-    iOS_tv("iOS.TV"),
-    iOS_carplay("iOS.CarPlay"),
-    iOS_mac("iOS.Mac"),
-    macOS("macOS"),
-    watchOS("watchOS"),
-    visionOS("visionOS"),
-    android("Android"),
-    android_phone("Android.phone"),
-    android_tablet("Android.tablet"),
-    android_tv("Android.TV"),
-    wearOS("WearOS"),
-    unknown("");
+    IOS("iOS"),
+    IOS_IPHONE("iOS.iPhone"),
+    IOS_IPAD("iOS.iPad"),
+    IOS_TV("iOS.TV"),
+    IOS_CARPLAY("iOS.CarPlay"),
+    IOS_MAC("iOS.Mac"),
+    MACOS("macOS"),
+    WATCHOS("watchOS"),
+    VISIONOS("visionOS"),
+    ANDROID("Android"),
+    ANDROID_PHONE("Android.phone"),
+    ANDROID_TABLET("Android.tablet"),
+    ANDROID_TV("Android.TV"),
+    WEAROS("WearOS"),
+    UNKNOWN("");
 
     fun appliesTo(other: Platform): Boolean {
         return when (this) {
-            iOS -> other.value.startsWith(iOS.value)
-            android -> other.value.startsWith(android.value)
-            unknown -> false
+            IOS -> other.value.startsWith(iOS.value)
+            ANDROID -> other.value.startsWith(android.value)
+            UNKNOWN -> false
             else -> this == other
         }
     }

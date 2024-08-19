@@ -1,9 +1,7 @@
 package com.egeniq.appremoteconfig
 
-import kotlinx.coroutines.joinAll
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.SimpleDateFormat
 import java.util.*
 
 fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
@@ -21,13 +19,6 @@ fun JSONArray.toList(): List<Any> {
     }
     return list
 }
-
-
-//class Config(json: Map<String, Any>) {
-//    var settings: Map<String, Any> = emptyMap()
-//    var deprecatedKeys: List<String> = emptyList()
-//    var overrides: List<Override> = emptyList()
-//    var meta: Map<String, Any> = emptyMap()
 
 class Config(
     val settings: JSONObject,

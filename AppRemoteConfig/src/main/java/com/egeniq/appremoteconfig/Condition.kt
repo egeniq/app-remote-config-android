@@ -2,10 +2,10 @@ package com.egeniq.appremoteconfig
 
 import org.json.JSONObject
 
-enum class BuildVariant {
-    RELEASE,
-    DEBUG,
-    UNKNOWN
+enum class BuildVariant(val value: String) {
+    RELEASE(value = "release"),
+    DEBUG(value = "debug"),
+    UNKNOWN(value = "unknown");
 }
 
 data class Condition(
@@ -18,12 +18,30 @@ data class Condition(
     val language: String?
 ) {
     constructor(json: JSONObject) : this(
-        matchNever = json.keys().asSequence().any { key -> !listOf("platform", "platformVersion", "appVersion", "variant", "buildVariant", "language").contains(key) },
-        platform = if (json.has("platform")) json.getString("platform").let { platform -> Platform.entries.firstOrNull { it.value == platform } } ?: Platform.unknown else null,
-        platformVersion = if (json.has("platformVersion")) json.getString("platformVersion").let { VersionRange.fromRawValue(it) } else null,
-        appVersion = if (json.has("appVersion")) json.getString("appVersion").let { VersionRange.fromRawValue(it) } else null,
+        matchNever = json.keys().asSequence().any { key ->
+            !listOf(
+                "platform",
+                "platformVersion",
+                "appVersion",
+                "variant",
+                "buildVariant",
+                "language"
+            ).contains(key)
+        },
+        platform = if (json.has("platform")) json.getString("platform")
+            .let { platform -> Platform.entries.firstOrNull { it.value == platform } }
+            ?: Platform.unknown else null, // TODO Set matchNever true instead of crash for unknown strings
+        platformVersion = if (json.has("platformVersion")) json.getString("platformVersion")
+            .let { VersionRange.fromRawValue(it) } else null, // TODO Set matchNever true instead of crash for unknown strings
+        appVersion = if (json.has("appVersion")) json.getString("appVersion")
+            .let { VersionRange.fromRawValue(it) } else null, // TODO Set matchNever true instead of crash for unknown strings
         variant = if (json.has("variant")) json.getString("variant") else null,
-        buildVariant = if (json.has("buildVariant")) json.getString("buildVariant").let { BuildVariant.valueOf(it) } else null,
+        buildVariant = if (json.has("buildVariant")) json.getString("buildVariant")
+            .let { buildVariant ->
+                BuildVariant.entries.firstOrNull() {
+                    it.value == buildVariant
+                }
+            } ?: BuildVariant.UNKNOWN else null,// TODO Set matchNever true instead of crash for unknown strings
         language = if (json.has("language")) json.getString("language") else null
     )
 

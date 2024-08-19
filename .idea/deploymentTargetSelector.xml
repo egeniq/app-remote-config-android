@@ -8,13 +8,16 @@
       <SelectionState runConfigName="AppRemoteConfigTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="parsing()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="overridingWithAppVersion()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="relevantDates()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="overridingWithABuildVariant()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="overridingWithAnSupportedBuildVariant()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

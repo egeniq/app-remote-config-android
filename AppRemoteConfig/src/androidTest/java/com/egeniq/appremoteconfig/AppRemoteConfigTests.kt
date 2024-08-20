@@ -1,9 +1,12 @@
 package com.egeniq.appremoteconfig
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.json.JSONObject
-import org.junit.Test
 import org.junit.Assert.*
+import org.junit.Test
 import org.junit.runner.RunWith
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -12,7 +15,8 @@ import java.util.Date
 class AppRemoteConfigTests {
 
     companion object {
-        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
+        val dateFormatter =
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
     }
 
     @Test
@@ -87,7 +91,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.DISTANT_PAST
         val config = Config(json)
         val settings = config.resolve(
             date = date,
@@ -106,7 +110,7 @@ class AppRemoteConfigTests {
 
     @Test
     fun overridingWithAppVersion() {
-    val jsonString = """
+        val jsonString = """
     {
         "settings": {
             "foo": 1
@@ -125,25 +129,24 @@ class AppRemoteConfigTests {
         ]
     }
     """
-    val json = JSONObject(jsonString)
+        val json = JSONObject(jsonString)
 
-    val date = Date(0)
-    val config = Config(json)
-    val settings = config.resolve(
-        date = date,
-        platform = Platform.iOS_iPhone,
-        platformVersion = OperatingSystemVersion(16, 0, 1),
-        appVersion = Version("1.0.0"),
-        buildVariant = BuildVariant.RELEASE
-    )
-
-    val foo = settings.getInt("foo")
-    assertEquals(2, foo)
-}
+        val date = Instant.DISTANT_PAST
+        val config = Config(json)
+        val settings: JsonObject = config.resolve(
+            date = date,
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        val foo = settings.get<Int>("foo")
+        assertEquals(2, foo)
+    }
 
     @Test
     fun overridingWithAppVersionRange() {
-    val jsonString = """
+        val jsonString = """
     {
         "settings": {
             "foo": 1
@@ -162,75 +165,75 @@ class AppRemoteConfigTests {
         ]
     }
     """
-    val json = JSONObject(jsonString)
+        val json = JSONObject(jsonString)
 
-    val date = Date(0)
-    val config = Config(json)
+        val date = Instant.DISTANT_PAST
+        val config = Config(json)
 
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.6.9"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.6.9"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(1, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.7.0"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(2, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.8.123"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(2, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("1.0.0"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(2, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("1.0.1"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(1, foo)
+        }
     }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.7.0"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.8.123"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("1.0.0"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("1.0.1"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
-    }
-}
 
     @Test
     fun overridingWithMultipleOverrides() {
-    val jsonString = """
+        val jsonString = """
     {
         "settings": {
             "foo": 1
@@ -259,71 +262,71 @@ class AppRemoteConfigTests {
         ]
     }
     """
-    val json = JSONObject(jsonString)
+        val json = JSONObject(jsonString)
 
-    val date = Date(0)
-    val config = Config(json)
+        val date = Instant.DISTANT_PAST
+        val config = Config(json)
 
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.6.9"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.6.9"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(1, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.7.0"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(2, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("0.8.123"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(2, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("1.0.0"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(3, foo)
+        }
+
+        runCatching {
+            val settings = config.resolve(
+                date = date,
+                platform = Platform.iOS_iPhone,
+                platformVersion = OperatingSystemVersion(16, 0, 1),
+                appVersion = Version("1.0.1"),
+                buildVariant = BuildVariant.RELEASE
+            )
+            val foo = settings.getInt("foo")
+            assertEquals(1, foo)
+        }
     }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.7.0"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("0.8.123"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("1.0.0"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(3, foo)
-    }
-
-    runCatching {
-        val settings = config.resolve(
-            date = date,
-            platform = Platform.iOS_iPhone,
-            platformVersion = OperatingSystemVersion(16, 0, 1),
-            appVersion = Version("1.0.1"),
-            buildVariant = BuildVariant.RELEASE
-        )
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
-    }
-}
 
     @Test
     fun versionParsing() {
@@ -365,96 +368,96 @@ class AppRemoteConfigTests {
 
     @Test
     fun versionRangeParsing() {
-    try {
-        val versionRange = VersionRange.fromRawValue("1.0.0")
-        assertEquals("1.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertTrue(versionRange.contains(Version("1.0.0")))
-        assertFalse(versionRange.contains(Version("1.0.1")))
-        assertFalse(versionRange.contains(Version("1.9.0")))
-        assertFalse(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("1.0.0")
+            assertEquals("1.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertTrue(versionRange.contains(Version("1.0.0")))
+            assertFalse(versionRange.contains(Version("1.0.1")))
+            assertFalse(versionRange.contains(Version("1.9.0")))
+            assertFalse(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue("1.0-2.0")
-        assertEquals("1.0.0-2.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertTrue(versionRange.contains(Version("1.0.0")))
-        assertTrue(versionRange.contains(Version("1.0.1")))
-        assertTrue(versionRange.contains(Version("1.9.0")))
-        assertTrue(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("1.0-2.0")
+            assertEquals("1.0.0-2.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertTrue(versionRange.contains(Version("1.0.0")))
+            assertTrue(versionRange.contains(Version("1.0.1")))
+            assertTrue(versionRange.contains(Version("1.9.0")))
+            assertTrue(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue(">1")
-        assertEquals(">1.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertFalse(versionRange.contains(Version("1.0.0")))
-        assertTrue(versionRange.contains(Version("1.0.1")))
-        assertTrue(versionRange.contains(Version("1.9.0")))
-        assertTrue(versionRange.contains(Version("2.0.0")))
-        assertTrue(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue(">1")
+            assertEquals(">1.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertFalse(versionRange.contains(Version("1.0.0")))
+            assertTrue(versionRange.contains(Version("1.0.1")))
+            assertTrue(versionRange.contains(Version("1.9.0")))
+            assertTrue(versionRange.contains(Version("2.0.0")))
+            assertTrue(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue("<=1.0.0")
-        assertEquals("<=1.0.0", versionRange.rawValue)
-        assertTrue(versionRange.contains(Version("0.9.9")))
-        assertTrue(versionRange.contains(Version("1.0.0")))
-        assertFalse(versionRange.contains(Version("1.0.1")))
-        assertFalse(versionRange.contains(Version("1.9.0")))
-        assertFalse(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("<=1.0.0")
+            assertEquals("<=1.0.0", versionRange.rawValue)
+            assertTrue(versionRange.contains(Version("0.9.9")))
+            assertTrue(versionRange.contains(Version("1.0.0")))
+            assertFalse(versionRange.contains(Version("1.0.1")))
+            assertFalse(versionRange.contains(Version("1.9.0")))
+            assertFalse(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue("1.0.0>-<2.0.0")
-        assertEquals("1.0.0>-<2.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertFalse(versionRange.contains(Version("1.0.0")))
-        assertTrue(versionRange.contains(Version("1.0.1")))
-        assertTrue(versionRange.contains(Version("1.9.0")))
-        assertFalse(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("1.0.0>-<2.0.0")
+            assertEquals("1.0.0>-<2.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertFalse(versionRange.contains(Version("1.0.0")))
+            assertTrue(versionRange.contains(Version("1.0.1")))
+            assertTrue(versionRange.contains(Version("1.9.0")))
+            assertFalse(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue("1.0.0>-2.0.0")
-        assertEquals("1.0.0>-2.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertFalse(versionRange.contains(Version("1.0.0")))
-        assertTrue(versionRange.contains(Version("1.0.1")))
-        assertTrue(versionRange.contains(Version("1.9.0")))
-        assertTrue(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("1.0.0>-2.0.0")
+            assertEquals("1.0.0>-2.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertFalse(versionRange.contains(Version("1.0.0")))
+            assertTrue(versionRange.contains(Version("1.0.1")))
+            assertTrue(versionRange.contains(Version("1.9.0")))
+            assertTrue(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    try {
-        val versionRange = VersionRange.fromRawValue("1.0.0-<2.0.0")
-        assertEquals("1.0.0-<2.0.0", versionRange.rawValue)
-        assertFalse(versionRange.contains(Version("0.9.9")))
-        assertTrue(versionRange.contains(Version("1.0.0")))
-        assertTrue(versionRange.contains(Version("1.0.1")))
-        assertTrue(versionRange.contains(Version("1.9.0")))
-        assertFalse(versionRange.contains(Version("2.0.0")))
-        assertFalse(versionRange.contains(Version("2.0.1")))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+        try {
+            val versionRange = VersionRange.fromRawValue("1.0.0-<2.0.0")
+            assertEquals("1.0.0-<2.0.0", versionRange.rawValue)
+            assertFalse(versionRange.contains(Version("0.9.9")))
+            assertTrue(versionRange.contains(Version("1.0.0")))
+            assertTrue(versionRange.contains(Version("1.0.1")))
+            assertTrue(versionRange.contains(Version("1.9.0")))
+            assertFalse(versionRange.contains(Version("2.0.0")))
+            assertFalse(versionRange.contains(Version("2.0.1")))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     @Test
@@ -481,7 +484,7 @@ class AppRemoteConfigTests {
         """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.DISTANT_PAST
         val config = Config(json)
         val settings = config.resolve(
             date = date,
@@ -495,9 +498,9 @@ class AppRemoteConfigTests {
         assertEquals(1, foo)
     }
 
-@Test
-fun relevantDates() {
-    val jsonString = """
+    @Test
+    fun relevantDates() {
+        val jsonString = """
     {
         "settings": {
             "foo": 1
@@ -520,22 +523,22 @@ fun relevantDates() {
         ]
     }
     """
-    val json = JSONObject(jsonString)
+        val json = JSONObject(jsonString)
 
-    val date = Date(0)
-    val config = Config(json)
-    val dates = config.relevantResolutionDates(
-        platform = Platform.iOS_iPhone,
-        platformVersion = OperatingSystemVersion(16, 0, 1),
-        appVersion = Version("1.0.0"),
-        buildVariant = BuildVariant.RELEASE
-    )
+        val date = Date(0)
+        val config = Config(json)
+        val dates = config.relevantResolutionDates(
+            platform = Platform.iOS_iPhone,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
 
-    val expectedDates = listOf(
-        dateFormatter.parse("2024-08-21T00:00:00Z"),
-        dateFormatter.parse("2024-09-11T00:00:00Z")
-    )
+        val expectedDates = listOf(
+            dateFormatter.parse("2024-08-21T00:00:00Z"),
+            dateFormatter.parse("2024-09-11T00:00:00Z")
+        )
 
-    assertEquals(expectedDates, dates)
-}
+        assertEquals(expectedDates, dates)
+    }
 }

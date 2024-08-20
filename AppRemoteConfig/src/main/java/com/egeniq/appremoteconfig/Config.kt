@@ -1,10 +1,9 @@
 package com.egeniq.appremoteconfig
 
-import kotlinx.coroutines.joinAll
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.*
 
 fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
     val list = mutableListOf<T>()
@@ -30,17 +29,17 @@ fun JSONArray.toList(): List<Any> {
 //    var meta: Map<String, Any> = emptyMap()
 
 class Config(
-    val settings: JSONObject,
+    val settings: JsonObject,
     val deprecatedKeys: List<String> = emptyList(),
     val overrides: List<Override> = emptyList(),
-    val meta: JSONObject
+    val meta: JsonObject,
 ) {
-    constructor(json: JSONObject) : this(
-        settings = json.getJSONObject("settings"),
-        deprecatedKeys = if (json.has("deprecatedKeys")) json.getJSONArray("deprecatedKeys")?.toList { it as String } ?: emptyList() else emptyList(),
-        overrides = json.getJSONArray("overrides")?.toList { Override(it as JSONObject) } ?: emptyList(),
-        meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
-    )
+    constructor(json: JSONObject) : this(settings = json.getJsonObject("settings"),
+        deprecatedKeys = if (json.has("deprecatedKeys")) json.getJsonArray("deprecatedKeys")
+            ?.toList { it as String } ?: emptyList() else emptyList(),
+        overrides = json.getJsonArray("overrides")?.toList { Override(it as JSONObject) }
+            ?: emptyList(),
+        meta = if (json.has("meta")) json.getJsonObject("meta") ?: JSONObject() else JSONObject())
 
 
 //    init {
@@ -59,14 +58,14 @@ class Config(
 //    }
 
     fun resolve(
-        date: Date,
+        date: Instant,
         platform: Platform,
         platformVersion: OperatingSystemVersion,
         appVersion: Version,
         variant: String? = null,
         buildVariant: BuildVariant,
-        language: String? = null
-    ): JSONObject {
+        language: String? = null,
+    ): JsonObject {
         return overrides.fold(settings) { partialResult, override ->
             val isScheduled: Boolean = if (override.schedule != null) {
                 override.schedule.contains(date)
@@ -77,12 +76,7 @@ class Config(
             val matches: Boolean = if (override.conditions != null) {
                 override.conditions.any { condition ->
                     condition.matches(
-                        platform,
-                        platformVersion,
-                        appVersion,
-                        variant,
-                        buildVariant,
-                        language
+                        platform, platformVersion, appVersion, variant, buildVariant, language
                     )
                 }
             } else {
@@ -90,8 +84,8 @@ class Config(
             }
 
             if (isScheduled && matches) {
-                for (key in override.settings.keys()) {
-                    partialResult.put(key, override.settings.get(key))
+                for (key in override.settings.keys) {
+                    partialResult.plus(key, override.settings[key])
                 }
                 partialResult
             } else {
@@ -106,20 +100,15 @@ class Config(
         appVersion: Version,
         variant: String? = null,
         buildVariant: BuildVariant,
-        language: String? = null
-    ): List<Date> {
-        var dates: List<Date> = emptyList()
+        language: String? = null,
+    ): List<Instant> {
+        var dates: List<Instant> = emptyList()
         return overrides.fold(dates) { partialResult, override ->
             if (override.schedule != null) {
                 val matches: Boolean = if (override.conditions != null) {
                     override.conditions.any { condition ->
                         condition.matches(
-                            platform,
-                            platformVersion,
-                            appVersion,
-                            variant,
-                            buildVariant,
-                            language
+                            platform, platformVersion, appVersion, variant, buildVariant, language
                         )
                     }
                 } else {
@@ -129,7 +118,7 @@ class Config(
                 if (matches) {
                     val from = override.schedule.from
                     val until = override.schedule.until
-                    val dates = mutableListOf<Date>()
+                    val dates = mutableListOf<Instant>()
                     if (from != null) {
                         dates.add(from)
                     }
@@ -143,7 +132,6 @@ class Config(
             } else {
                 partialResult
             }
-        }
-            .sorted()
+        }.sorted()
     }
 }

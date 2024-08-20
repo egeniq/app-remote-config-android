@@ -30,6 +30,23 @@ DerivedData/
 *.dSYM.zip
 *.dSYM
 
+.gradle/
+build/
+.build-cache/
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# IntelliJ
+*.iml
+.idea/
+.idea/*
+
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace

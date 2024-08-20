@@ -6,6 +6,7 @@ package com.egeniq.appremoteconfig
 //    UNEXPECTED_TYPE_FOR_KEY("Unexpected type for key");
 //}
 
+
 sealed class ConfigError : Exception() {
     class NonSemanticVersion : ConfigError()
     class InvalidVersionRange : ConfigError()

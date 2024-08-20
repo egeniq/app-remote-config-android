@@ -1,5 +1,8 @@
 package com.egeniq.appremoteconfig
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Platform(val value: String) {
     iOS("iOS"),
     iOS_iPhone("iOS.iPhone"),
@@ -25,4 +28,11 @@ enum class Platform(val value: String) {
             else -> this == other
         }
     }
+
+    companion object {
+        fun fromString(value: String): Platform {
+            return entries.find { it.name.equals(value, true) } ?: android
+        }
+    }
+
 }

@@ -79,7 +79,7 @@ class AppRemoteConfigTests {
                 "client": "Secret Agency"
             }
         }
-    """
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -89,6 +89,7 @@ class AppRemoteConfigTests {
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
+            variant = "AppStore",
             buildVariant = BuildVariant.RELEASE
         )
 
@@ -102,24 +103,24 @@ class AppRemoteConfigTests {
     @Test
     fun overridingWithAppVersion() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "appVersion": "1.0.0"
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "1.0.0"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "settings": {
-                    "foo": 2
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -139,24 +140,24 @@ class AppRemoteConfigTests {
     @Test
     fun overridingWithAppVersionRange() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "appVersion": "0.7.0-1.0.0"
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "0.7.0-1.0.0"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "settings": {
-                    "foo": 2
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -226,34 +227,34 @@ class AppRemoteConfigTests {
     @Test
     fun overridingWithMultipleOverrides() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "appVersion": "0.7.0-1.0.0"
-                    }
-                ],
-                "settings": {
-                    "foo": 2
-                }
+        {
+            "settings": {
+                "foo": 1
             },
-            {
-                "matching": [
-                    {
-                        "appVersion": "1.0.0"
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "0.7.0-1.0.0"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "settings": {
-                    "foo": 3
+                },
+                {
+                    "matching": [
+                        {
+                            "appVersion": "1.0.0"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 3
+                    }
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -493,31 +494,30 @@ class AppRemoteConfigTests {
     @Test
     fun relevantDates() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "appVersion": "1.0.0"
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "1.0.0"
+                        }
+                    ],
+                    "schedule": {
+                        "from": "2024-08-21T00:00:00Z",
+                        "until": "2024-09-11T00:00:00Z"
+                    },
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "schedule": {
-                    "from": "2024-08-21T00:00:00Z",
-                    "until": "2024-09-11T00:00:00Z"
-                },
-                "settings": {
-                    "foo": 2
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
-        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val dates = config.relevantResolutionDates(
             platform = Platform.IOS_IPHONE,
@@ -535,26 +535,69 @@ class AppRemoteConfigTests {
     }
 
     @Test
+    fun relevantDatesWithOtherZones() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "1.0.0"
+                        }
+                    ],
+                    "schedule": {
+                        "from": "2024-08-21T00:00:00+01:00",
+                        "until": "2024-09-11T00:00:00-09:00"
+                    },
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val config = Config(json)
+        val dates = config.relevantResolutionDates(
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
+        val expectedDates = listOf(
+            Instant.parse("2024-08-20T23:00:00Z"),
+            Instant.parse("2024-09-11T09:00:00Z")
+        )
+
+        assertEquals(expectedDates, dates)
+    }
+
+    @Test
     fun overridingWithABuildVariant() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "buildVariant": "debug"
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "buildVariant": "debug"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "settings": {
-                    "foo": 2
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -588,24 +631,24 @@ class AppRemoteConfigTests {
     @Test
     fun overridingWithAnUnsupportedBuildVariant() {
         val jsonString = """
-    {
-        "settings": {
-            "foo": 1
-        },
-        "overrides": [
-            {
-                "matching": [
-                    {
-                        "buildVariant": "unsupported variant"
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "buildVariant": "unsupported variant"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
                     }
-                ],
-                "settings": {
-                    "foo": 2
                 }
-            }
-        ]
-    }
-    """
+            ]
+        }
+        """
         val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
@@ -617,6 +660,155 @@ class AppRemoteConfigTests {
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
         )
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    @Test
+    fun overridingWithInvalidKeys() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "buildVariant": "unsupported variant",
+                            "platform": true
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val date = Instant.fromEpochMilliseconds(0)
+        val config = Config(json)
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    @Test
+    fun overridingWithUnknownPlatform() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "platform": "unsupported platform"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val date = Instant.fromEpochMilliseconds(0)
+        val config = Config(json)
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    @Test
+    fun overridingWithUnsupportedKey() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "unsupported key": "unsupported value"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val date = Instant.fromEpochMilliseconds(0)
+        val config = Config(json)
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
+        val foo = settings.getInt("foo")
+        assertEquals(1, foo)
+    }
+
+    @Test
+    fun overridingWithUnsupportedAppVersion() {
+        val jsonString = """
+        {
+            "settings": {
+                "foo": 1
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "appVersion": "unsupported value"
+                        }
+                    ],
+                    "settings": {
+                        "foo": 2
+                    }
+                }
+            ]
+        }
+        """
+        val json = JSONObject(jsonString)
+
+        val date = Instant.fromEpochMilliseconds(0)
+        val config = Config(json)
+        val settings = config.resolve(
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+
         val foo = settings.getInt("foo")
         assertEquals(1, foo)
     }

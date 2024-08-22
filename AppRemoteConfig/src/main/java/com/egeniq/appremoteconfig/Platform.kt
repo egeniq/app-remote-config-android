@@ -15,9 +15,9 @@ enum class Platform(val value: String) {
     ANDROID_TABLET("Android.tablet"),
     ANDROID_TV("Android.TV"),
     WEAROS("WearOS"),
-    UNKNOWN("");
+    UNKNOWN("unknown");
 
-    fun appliesTo(other: Platform): Boolean {
+    internal fun appliesTo(other: Platform): Boolean {
         return when (this) {
             IOS -> other.value.startsWith(IOS.value)
             ANDROID -> other.value.startsWith(ANDROID.value)

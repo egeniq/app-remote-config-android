@@ -3,9 +3,8 @@ package com.egeniq.appremoteconfig
 import kotlinx.datetime.Instant
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
 
-fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
+internal fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
     val list = mutableListOf<T>()
     for (i in 0 until length()) {
         list.add(transform(this[i]))
@@ -13,19 +12,11 @@ fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
     return list
 }
 
-fun JSONArray.toList(): List<Any> {
-    val list = mutableListOf<Any>()
-    for (i in 0 until length()) {
-        list.add(this[i])
-    }
-    return list
-}
-
 class Config(
-    val settings: JSONObject,
-    val deprecatedKeys: List<String> = emptyList(),
-    val overrides: List<Override> = emptyList(),
-    val meta: JSONObject
+    private val settings: JSONObject,
+    private val deprecatedKeys: List<String> = emptyList(),
+    private val overrides: List<Override> = emptyList(),
+    private val meta: JSONObject
 ) {
     constructor(json: JSONObject) : this(
         settings = json.getJSONObject("settings"),
@@ -76,7 +67,7 @@ class Config(
         }
     }
 
-    fun relevantResolutionDates(
+    public fun relevantResolutionDates(
         platform: Platform,
         platformVersion: OperatingSystemVersion,
         appVersion: Version,
@@ -84,7 +75,7 @@ class Config(
         buildVariant: BuildVariant,
         language: String? = null
     ): List<Instant> {
-        var dates: List<Instant> = emptyList()
+        val dates: List<Instant> = emptyList()
         return overrides.fold(dates) { partialResult, override ->
             if (override.schedule != null) {
                 val matches: Boolean = if (override.conditions != null) {

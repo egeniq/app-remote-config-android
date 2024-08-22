@@ -27,23 +27,111 @@ data class Condition(
                 "buildVariant",
                 "language"
             ).contains(key)
-        },
-        platform = if (json.has("platform")) json.getString("platform")
-            .let { platform -> Platform.entries.firstOrNull { it.value == platform } }
-            ?: Platform.UNKNOWN else null, // TODO Set matchNever true instead of crash for unknown strings
-        platformVersion = if (json.has("platformVersion")) json.getString("platformVersion")
-            .let { VersionRange.fromRawValue(it) } else null, // TODO Set matchNever true instead of crash for unknown strings
-        appVersion = if (json.has("appVersion")) json.getString("appVersion")
-            .let { VersionRange.fromRawValue(it) } else null, // TODO Set matchNever true instead of crash for unknown strings
-        variant = if (json.has("variant")) json.getString("variant") else null,
-        buildVariant = if (json.has("buildVariant")) json.getString("buildVariant")
-            .let { buildVariant ->
-                BuildVariant.entries.firstOrNull() {
-                    it.value == buildVariant
-                }
-            } ?: BuildVariant.UNKNOWN else null,// TODO Set matchNever true instead of crash for unknown strings
-        language = if (json.has("language")) json.getString("language") else null
+        } || parseFields(json),
+        platform = parsePlatform(json),
+        platformVersion = parsePlatformVersion(json),
+        appVersion = parseAppVersion(json),
+        variant = parseVariant(json),
+        buildVariant = parseBuildVariant(json),
+        language = parseLanguage(json)
     )
+
+    companion object {
+        private fun parseFields(json: JSONObject): Boolean {
+            var matchNever = false
+            if (json.has("platform")) {
+                val platform = parsePlatform(json)
+                if (platform == null) {
+                    matchNever = true
+                }
+            }
+
+            if (json.has("platformVersion")) {
+                val platformVersion = parsePlatformVersion(json)
+                if (platformVersion == null) {
+                    matchNever = true
+                }
+            }
+
+            if (json.has("appVersion")) {
+                val appVersion = parseAppVersion(json)
+                if (appVersion == null) {
+                    matchNever = true
+                }
+            }
+
+            if (json.has("variant")) {
+                val variant = parseVariant(json)
+                if (variant == null) {
+                    matchNever = true
+                }
+            }
+
+            if (json.has("buildVariant")) {
+                val buildVariant = parseBuildVariant(json)
+                if (buildVariant == null) {
+                    matchNever = true
+                }
+            }
+
+            if (json.has("language")) {
+                val language = parseLanguage(json)
+                if (language == null) {
+                    matchNever = true
+                }
+            }
+
+            return matchNever
+        }
+
+        private fun parsePlatform(json: JSONObject): Platform? {
+            return json.optString("platform").let { platform ->
+                try {
+                    Platform.entries.firstOrNull { it.value == platform }
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        private fun parsePlatformVersion(json: JSONObject): VersionRange? {
+            return json.optString("platformVersion").let {
+                try {
+                    VersionRange.fromRawValue(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        private fun parseAppVersion(json: JSONObject): VersionRange? {
+            return json.optString("appVersion").let {
+                try {
+                    VersionRange.fromRawValue(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        private fun parseVariant(json: JSONObject): String? {
+            return if (json.has("variant")) json.getString("variant") else null
+        }
+
+        private fun parseBuildVariant(json: JSONObject): BuildVariant? {
+            return json.optString("buildVariant").let { buildVariant ->
+                try {
+                    BuildVariant.entries.firstOrNull { it.value == buildVariant }
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        private fun parseLanguage(json: JSONObject): String? {
+            return if (json.has("language")) json.getString("language") else null
+        }
+    }
 
     fun matches(
         platform: Platform,

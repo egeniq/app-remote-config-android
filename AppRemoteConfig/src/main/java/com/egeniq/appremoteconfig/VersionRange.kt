@@ -20,10 +20,6 @@ sealed class VersionRange {
                     else -> other >= lower.first && other <= upper.first
                 }
             }
-
-            else -> {
-                throw ConfigError.InvalidVersionRange()
-            }
         }
     }
 

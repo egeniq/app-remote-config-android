@@ -1,20 +1,13 @@
 package com.egeniq.appremoteconfig
-import android.annotation.SuppressLint
+
 import kotlinx.datetime.Instant
-import java.text.SimpleDateFormat
-import java.util.*
 import org.json.JSONObject
 
-//@Serializable
 data class Schedule(
     var matchNever: Boolean,
-    var from: Date?,
-    var until: Date?
+    var from: Instant?,
+    var until: Instant?
 ) {
-    companion object {
-        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
-    }
-
     constructor(json: JSONObject) : this(
         matchNever = false,
         from = null,
@@ -23,7 +16,7 @@ data class Schedule(
         if (json.has("from")) {
             try {
                 val fromString = json.getString("from")
-                val date = dateFormatter.parse(fromString)
+                val date = Instant.parse(fromString)
                 from = date
             } catch (e: Exception) {
                 matchNever = true
@@ -38,7 +31,7 @@ data class Schedule(
         if (json.has("until")) {
             try {
                 val fromString = json.getString("until")
-                val date = dateFormatter.parse(fromString)
+                val date = Instant.parse(fromString)
                 until = date
             } catch (e: Exception) {
                 matchNever = true
@@ -52,7 +45,10 @@ data class Schedule(
         matchNever = false
     }
 
-    fun contains(date: Date): Boolean {
+    fun contains(date: Instant): Boolean {
+        val from = from
+        val until = until
+
         if (matchNever) {
             return false
         }

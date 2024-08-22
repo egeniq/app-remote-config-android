@@ -1,5 +1,6 @@
 package com.egeniq.appremoteconfig
 
+import kotlinx.datetime.Instant
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -33,24 +34,8 @@ class Config(
         meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
     )
 
-
-//    init {
-//        json["settings"]?.let { jsonValue ->
-//            if (jsonValue is Map<*, *>) {
-//                @Suppress("UNCHECKED_CAST")
-//                settings = jsonValue as Map<String, Any>
-//            } else {
-//                throw ConfigError.UnexpectedTypeForKey() // ConfigError("Unexpected type for key 'settings'")
-//            }
-//        }
-//        deprecatedKeys = json["deprecatedKeys"] as? List<String> ?: emptyList()
-//        overrides =
-//            (json["overrides"] as? List<Map<String, Any>>)?.map { Override(it) } ?: emptyList()
-//        meta = json["meta"] as? Map<String, Any> ?: emptyMap()
-//    }
-
     fun resolve(
-        date: Date,
+        date: Instant,
         platform: Platform,
         platformVersion: OperatingSystemVersion,
         appVersion: Version,
@@ -98,8 +83,8 @@ class Config(
         variant: String? = null,
         buildVariant: BuildVariant,
         language: String? = null
-    ): List<Date> {
-        var dates: List<Date> = emptyList()
+    ): List<Instant> {
+        var dates: List<Instant> = emptyList()
         return overrides.fold(dates) { partialResult, override ->
             if (override.schedule != null) {
                 val matches: Boolean = if (override.conditions != null) {
@@ -120,7 +105,7 @@ class Config(
                 if (matches) {
                     val from = override.schedule.from
                     val until = override.schedule.until
-                    val dates = mutableListOf<Date>()
+                    val dates = mutableListOf<Instant>()
                     if (from != null) {
                         dates.add(from)
                     }

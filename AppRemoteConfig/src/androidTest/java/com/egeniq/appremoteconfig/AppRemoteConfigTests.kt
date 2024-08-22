@@ -1,20 +1,14 @@
 package com.egeniq.appremoteconfig
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.datetime.Instant
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.RunWith
-import java.text.SimpleDateFormat
-import java.util.Date
 
 @RunWith(AndroidJUnit4::class)
 class AppRemoteConfigTests {
-
-    companion object {
-        val dateFormatter =
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
-    }
 
     @Test
     fun parsing() {
@@ -88,7 +82,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val settings = config.resolve(
             date = date,
@@ -128,7 +122,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val settings = config.resolve(
             date = date,
@@ -165,7 +159,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
 
         runCatching {
@@ -262,7 +256,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
 
         runCatching {
@@ -482,7 +476,7 @@ class AppRemoteConfigTests {
         """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val settings = config.resolve(
             date = date,
@@ -523,7 +517,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val dates = config.relevantResolutionDates(
             platform = Platform.IOS_IPHONE,
@@ -533,8 +527,8 @@ class AppRemoteConfigTests {
         )
 
         val expectedDates = listOf(
-            dateFormatter.parse("2024-08-21T00:00:00Z"),
-            dateFormatter.parse("2024-09-11T00:00:00Z")
+            Instant.parse("2024-08-21T00:00:00Z"),
+            Instant.parse("2024-09-11T00:00:00Z")
         )
 
         assertEquals(expectedDates, dates)
@@ -563,7 +557,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
 
         runCatching {
@@ -614,7 +608,7 @@ class AppRemoteConfigTests {
     """
         val json = JSONObject(jsonString)
 
-        val date = Date(0)
+        val date = Instant.fromEpochMilliseconds(0)
         val config = Config(json)
         val settings = config.resolve(
             date = date,

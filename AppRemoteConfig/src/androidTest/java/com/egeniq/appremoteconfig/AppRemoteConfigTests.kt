@@ -2,22 +2,15 @@ package com.egeniq.appremoteconfig
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import org.json.JSONObject
+import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.text.SimpleDateFormat
-import java.util.Date
 
 @RunWith(AndroidJUnit4::class)
 class AppRemoteConfigTests {
-
-    companion object {
-        val dateFormatter =
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
-    }
 
     @Test
     fun parsing() {
@@ -89,7 +82,7 @@ class AppRemoteConfigTests {
             }
         }
     """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
         val date = Instant.DISTANT_PAST
         val config = Config(json)
@@ -129,7 +122,7 @@ class AppRemoteConfigTests {
         ]
     }
     """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
         val date = Instant.DISTANT_PAST
         val config = Config(json)
@@ -165,7 +158,7 @@ class AppRemoteConfigTests {
         ]
     }
     """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
         val date = Instant.DISTANT_PAST
         val config = Config(json)
@@ -178,7 +171,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(1, foo)
         }
 
@@ -190,7 +183,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(2, foo)
         }
 
@@ -202,7 +195,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(2, foo)
         }
 
@@ -214,7 +207,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(2, foo)
         }
 
@@ -226,7 +219,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(1, foo)
         }
     }
@@ -262,7 +255,7 @@ class AppRemoteConfigTests {
         ]
     }
     """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
         val date = Instant.DISTANT_PAST
         val config = Config(json)
@@ -275,7 +268,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(1, foo)
         }
 
@@ -287,7 +280,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(2, foo)
         }
 
@@ -299,7 +292,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(2, foo)
         }
 
@@ -311,7 +304,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(3, foo)
         }
 
@@ -323,7 +316,7 @@ class AppRemoteConfigTests {
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
             )
-            val foo = settings.getInt("foo")
+            val foo = settings.get<Int>("foo")
             assertEquals(1, foo)
         }
     }
@@ -482,7 +475,7 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
         val date = Instant.DISTANT_PAST
         val config = Config(json)
@@ -494,7 +487,7 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings.getInt("foo")
+        val foo = settings.get<Int>("foo")
         assertEquals(1, foo)
     }
 
@@ -523,9 +516,8 @@ class AppRemoteConfigTests {
         ]
     }
     """
-        val json = JSONObject(jsonString)
+        val json = Json.parseToJsonElement(jsonString).jsonObject
 
-        val date = Date(0)
         val config = Config(json)
         val dates = config.relevantResolutionDates(
             platform = Platform.iOS_iPhone,
@@ -535,8 +527,8 @@ class AppRemoteConfigTests {
         )
 
         val expectedDates = listOf(
-            dateFormatter.parse("2024-08-21T00:00:00Z"),
-            dateFormatter.parse("2024-09-11T00:00:00Z")
+            Instant.parse("2024-08-21T00:00:00Z"),
+            Instant.parse("2024-09-11T00:00:00Z")
         )
 
         assertEquals(expectedDates, dates)

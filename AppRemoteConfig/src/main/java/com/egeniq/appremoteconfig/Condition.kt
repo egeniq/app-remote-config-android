@@ -1,7 +1,9 @@
 package com.egeniq.appremoteconfig
 
 import kotlinx.serialization.Serializable
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 enum class BuildVariant {
     RELEASE,
@@ -11,16 +13,16 @@ enum class BuildVariant {
 
 @Serializable
 data class Condition(
-    val matchNever: Boolean,
-    val platform: Platform?,
-    val platformVersion: VersionRange?,
-    val appVersion: VersionRange?,
-    val variant: String?,
-    val buildVariant: BuildVariant?,
-    val language: String?,
+    val matchNever: Boolean = true,
+    val platform: Platform? = null,
+    val platformVersion: VersionRange? = null,
+    val appVersion: VersionRange? = null,
+    val variant: String? = null,
+    val buildVariant: BuildVariant? = null,
+    val language: String? = null,
 ) {
-    constructor(json: JSONObject) : this(
-        matchNever = json.keys().asSequence().any { key ->
+    constructor(json: JsonObject) : this(
+        matchNever = json.keys.any { key ->
             !listOf(
                 "platform",
                 "platformVersion",
@@ -30,17 +32,20 @@ data class Condition(
                 "language"
             ).contains(key)
         },
-        platform = if (json.has("platform")) json.getString("platform")
-            .let { platform -> Platform.entries.firstOrNull { it.value == platform } }
-            ?: Platform.unknown else null,
-        platformVersion = if (json.has("platformVersion")) json.getString("platformVersion")
-            .let { VersionRange.fromRawValue(it) } else null,
-        appVersion = if (json.has("appVersion")) json.getString("appVersion")
-            .let { VersionRange.fromRawValue(it) } else null,
-        variant = if (json.has("variant")) json.getString("variant") else null,
-        buildVariant = if (json.has("buildVariant")) json.getString("buildVariant")
-            .let { BuildVariant.valueOf(it) } else null,
-        language = if (json.has("language")) json.getString("language") else null
+        platform = json["platform"]?.jsonPrimitive?.contentOrNull?.let { platform ->
+            Platform.entries.firstOrNull { it.value == platform } ?: Platform.unknown
+        },
+        platformVersion = json["platformVersion"]?.jsonPrimitive?.contentOrNull?.let {
+            VersionRange.fromRawValue(it.toString())
+        },
+        appVersion = json["appVersion"]?.jsonPrimitive?.contentOrNull?.let {
+            VersionRange.fromRawValue(it.toString())
+        },
+        variant = json["variant"]?.jsonPrimitive?.contentOrNull,
+        buildVariant = json["buildVariant"]?.jsonPrimitive?.contentOrNull?.let {
+            BuildVariant.valueOf(it.toString())
+        },
+        language = json["language"]?.jsonPrimitive?.contentOrNull
     )
 
     fun matches(

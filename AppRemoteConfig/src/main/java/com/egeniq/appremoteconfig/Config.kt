@@ -2,31 +2,10 @@ package com.egeniq.appremoteconfig
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.JsonObject
-import org.json.JSONArray
-import org.json.JSONObject
-
-fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
-    val list = mutableListOf<T>()
-    for (i in 0 until length()) {
-        list.add(transform(this[i]))
-    }
-    return list
-}
-
-fun JSONArray.toList(): List<Any> {
-    val list = mutableListOf<Any>()
-    for (i in 0 until length()) {
-        list.add(this[i])
-    }
-    return list
-}
-
-
-//class Config(json: Map<String, Any>) {
-//    var settings: Map<String, Any> = emptyMap()
-//    var deprecatedKeys: List<String> = emptyList()
-//    var overrides: List<Override> = emptyList()
-//    var meta: Map<String, Any> = emptyMap()
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 
 class Config(
     val settings: JsonObject,
@@ -34,28 +13,13 @@ class Config(
     val overrides: List<Override> = emptyList(),
     val meta: JsonObject,
 ) {
-    constructor(json: JSONObject) : this(settings = json.getJsonObject("settings"),
-        deprecatedKeys = if (json.has("deprecatedKeys")) json.getJsonArray("deprecatedKeys")
-            ?.toList { it as String } ?: emptyList() else emptyList(),
-        overrides = json.getJsonArray("overrides")?.toList { Override(it as JSONObject) }
-            ?: emptyList(),
-        meta = if (json.has("meta")) json.getJsonObject("meta") ?: JSONObject() else JSONObject())
-
-
-//    init {
-//        json["settings"]?.let { jsonValue ->
-//            if (jsonValue is Map<*, *>) {
-//                @Suppress("UNCHECKED_CAST")
-//                settings = jsonValue as Map<String, Any>
-//            } else {
-//                throw ConfigError.UnexpectedTypeForKey() // ConfigError("Unexpected type for key 'settings'")
-//            }
-//        }
-//        deprecatedKeys = json["deprecatedKeys"] as? List<String> ?: emptyList()
-//        overrides =
-//            (json["overrides"] as? List<Map<String, Any>>)?.map { Override(it) } ?: emptyList()
-//        meta = json["meta"] as? Map<String, Any> ?: emptyMap()
-//    }
+    constructor(json: JsonObject) : this(
+        settings = json["settings"]?.jsonObject ?: buildJsonObject { },
+        deprecatedKeys = if (json.containsKey("deprecatedKeys")) json["deprecatedKeys"]?.jsonArray
+            ?.map { it.jsonPrimitive.content } ?: emptyList() else emptyList(),
+        overrides = json["overrides"]?.jsonArray?.map { Override(it.jsonObject) } ?: emptyList(),
+        meta = if (json.containsKey("meta")) json["meta"]?.jsonObject ?: buildJsonObject { } else buildJsonObject { }
+    )
 
     fun resolve(
         date: Instant,
@@ -85,7 +49,7 @@ class Config(
 
             if (isScheduled && matches) {
                 for (key in override.settings.keys) {
-                    partialResult.plus(key, override.settings[key])
+//  TODO:                 partialResult.plus(key, override.settings[key])
                 }
                 partialResult
             } else {

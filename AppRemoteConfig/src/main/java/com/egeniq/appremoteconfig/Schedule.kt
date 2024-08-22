@@ -2,8 +2,9 @@ package com.egeniq.appremoteconfig
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import org.json.JSONObject
-import java.text.SimpleDateFormat
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 
 @Serializable
 data class Schedule(
@@ -11,20 +12,15 @@ data class Schedule(
     var from: Instant?,
     var until: Instant?,
 ) {
-    companion object {
-        val dateFormatter =
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") // Quoted "Z" to indicate UTC, no timezone offset is weird!
-    }
-
-    constructor(json: JSONObject) : this(
+    constructor(json: JsonObject) : this(
         matchNever = false,
         from = null,
         until = null
     ) {
-        if (json.has("from")) {
+        if (json.containsKey("from")) {
             try {
-                val fromString = json.getString("from")
-                val date = dateFormatter.parse(fromString)
+                val fromString = json["from"]?.jsonPrimitive?.contentOrNull
+                val date = fromString?.let { Instant.parse(it) }
                 from = date
             } catch (e: Exception) {
                 matchNever = true
@@ -36,10 +32,10 @@ data class Schedule(
             from = null
         }
 
-        if (json.has("until")) {
+        if (json.containsKey("until")) {
             try {
-                val fromString = json.getString("until")
-                val date = dateFormatter.parse(fromString)
+                val untilString = json["until"]?.jsonPrimitive?.contentOrNull
+                val date = untilString?.let { Instant.parse(it) }
                 until = date
             } catch (e: Exception) {
                 matchNever = true
@@ -54,6 +50,10 @@ data class Schedule(
     }
 
     fun contains(date: Instant): Boolean {
+        val from = from
+        val until = until
+        val matchNever = matchNever
+
         if (matchNever) {
             return false
         }

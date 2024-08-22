@@ -30,7 +30,7 @@ data class Condition(
         },
         platform = if (json.has("platform")) json.getString("platform")
             .let { platform -> Platform.entries.firstOrNull { it.value == platform } }
-            ?: Platform.unknown else null, // TODO Set matchNever true instead of crash for unknown strings
+            ?: Platform.UNKNOWN else null, // TODO Set matchNever true instead of crash for unknown strings
         platformVersion = if (json.has("platformVersion")) json.getString("platformVersion")
             .let { VersionRange.fromRawValue(it) } else null, // TODO Set matchNever true instead of crash for unknown strings
         appVersion = if (json.has("appVersion")) json.getString("appVersion")

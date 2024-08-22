@@ -19,8 +19,8 @@ enum class Platform(val value: String) {
 
     fun appliesTo(other: Platform): Boolean {
         return when (this) {
-            IOS -> other.value.startsWith(iOS.value)
-            ANDROID -> other.value.startsWith(android.value)
+            IOS -> other.value.startsWith(IOS.value)
+            ANDROID -> other.value.startsWith(ANDROID.value)
             UNKNOWN -> false
             else -> this == other
         }

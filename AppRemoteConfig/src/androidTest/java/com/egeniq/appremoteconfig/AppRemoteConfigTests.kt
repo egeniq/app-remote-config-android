@@ -92,7 +92,7 @@ class AppRemoteConfigTests {
         val config = Config(json)
         val settings = config.resolve(
             date = date,
-            platform = Platform.iOS_iPhone,
+            platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
@@ -132,7 +132,7 @@ class AppRemoteConfigTests {
         val config = Config(json)
         val settings = config.resolve(
             date = date,
-            platform = Platform.iOS_iPhone,
+            platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
@@ -171,7 +171,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
@@ -183,7 +183,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
@@ -195,7 +195,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
@@ -207,7 +207,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
@@ -219,7 +219,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
@@ -268,7 +268,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
@@ -280,7 +280,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
@@ -292,7 +292,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
@@ -304,7 +304,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
@@ -316,7 +316,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
@@ -486,7 +486,7 @@ class AppRemoteConfigTests {
         val config = Config(json)
         val settings = config.resolve(
             date = date,
-            platform = Platform.iOS_iPhone,
+            platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
@@ -526,7 +526,7 @@ class AppRemoteConfigTests {
         val date = Date(0)
         val config = Config(json)
         val dates = config.relevantResolutionDates(
-            platform = Platform.iOS_iPhone,
+            platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
@@ -569,7 +569,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.DEBUG
@@ -581,7 +581,7 @@ class AppRemoteConfigTests {
         runCatching {
             val settings = config.resolve(
                 date = date,
-                platform = Platform.iOS_iPhone,
+                platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
@@ -618,7 +618,7 @@ class AppRemoteConfigTests {
         val config = Config(json)
         val settings = config.resolve(
             date = date,
-            platform = Platform.iOS_iPhone,
+            platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE

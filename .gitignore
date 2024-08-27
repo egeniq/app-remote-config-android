@@ -95,6 +95,7 @@ build/
 
 # Local configuration file (sdk path, etc)
 local.properties
+publish.properties
 
 # Log/OS Files
 *.log

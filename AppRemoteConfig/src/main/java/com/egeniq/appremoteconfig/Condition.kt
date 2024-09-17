@@ -2,12 +2,16 @@ package com.egeniq.appremoteconfig
 
 import org.json.JSONObject
 
-enum class BuildVariant(val value: String) {
-    RELEASE(value = "release"),
-    DEBUG(value = "debug"),
-    UNKNOWN(value = "unknown");
-}
-
+/**
+ * To be considered a match, the condition should match all properties.
+ *
+ * @param platform The platform the app is running on.
+ * @param platformVersion The semantic version of platform the app is running on.
+ * @param appVersion The semantic version of the app.
+ * @param variant The variant of the app.
+ * @param buildVariant The build variant of the app.
+ * @param language The language the app is using currently as two character code.
+ */
 data class Condition(
     val matchNever: Boolean,
     val platform: Platform?,
@@ -18,6 +22,7 @@ data class Condition(
     val language: String?
 ) {
     constructor(json: JSONObject) : this(
+        // If there is a new unknown key, never match condition
         matchNever = json.keys().asSequence().any { key ->
             !listOf(
                 "platform",

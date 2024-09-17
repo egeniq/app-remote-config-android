@@ -12,12 +12,25 @@ internal fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
     return list
 }
 
+/**
+ * A simple but effective way to manage apps remotely. A simple configuration file that is easy to maintain and host, yet provides important flexibility to specify settings based on your needs.
+ *
+ * @property settings The default settings that an app should use.
+ * @property deprecatedKeys Keys that are no longer in use, but may still be used by overrides to accomodate older versions of an app.
+ * @property overrides Overrides containing the settings to apply when they match and/or are scheduled. Applied from top to bottom.
+ * @property meta Store metadata such as author or last updated date here.
+ */
 class Config(
     private val settings: JSONObject,
     private val deprecatedKeys: List<String> = emptyList(),
     private val overrides: List<Override> = emptyList(),
     private val meta: JSONObject
 ) {
+    /**
+     * Create a config from a JSON like structure
+     *
+     * @param json JSON descibing the desired configuration according to this [scheme](https://raw.githubusercontent.com/egeniq/app-remote-config/main/Schema/appremoteconfig.schema.json)
+     */
     constructor(json: JSONObject) : this(
         settings = json.getJSONObject("settings"),
         deprecatedKeys = if (json.has("deprecatedKeys")) json.getJSONArray("deprecatedKeys")?.toList { it as String } ?: emptyList() else emptyList(),
@@ -25,6 +38,18 @@ class Config(
         meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
     )
 
+    /**
+     *Resolves which settings should be used by an app within its context
+     *
+     * @param date The date at which the settings are used
+     * @param platform The platform on which the app runs
+     * @param platformVersion The version of the platform on which the app runs
+     * @param appVersion The version of the app that runs
+     * @param variant The variant of the app that runs
+     * @param buildVariant The build variant of the app that runs
+     * @param language The language in which the app runs
+     * @return A `JSONObject` containing the resolved settings.
+     */
     fun resolve(
         date: Instant,
         platform: Platform,
@@ -67,6 +92,17 @@ class Config(
         }
     }
 
+    /**
+     * Lists all dates on which resolving the config could give other setings
+     *
+     * @param platform The platform on which the app runs
+     * @param platformVersion The version of the platform on which the app runs
+     * @param appVersion The version of the app that runs
+     * @param variant The variant of the app that runs
+     * @param buildVariant The build variant of the app that runs
+     * @param language The language in which the app runs
+     * @return A list of `Instant` representing the relevant dates.
+     */
     public fun relevantResolutionDates(
         platform: Platform,
         platformVersion: OperatingSystemVersion,

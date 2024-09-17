@@ -1,9 +1,44 @@
 package com.egeniq.appremoteconfig
 
+/**
+ * Range of versions
+ */
 sealed class VersionRange {
+    /**
+     * Matches an exact version
+     *
+     * Example string representation: \
+     * `1.0.0`
+     */
     data class Equal(val version: Version) : VersionRange()
+
+    /**
+     * Matches a version lesser than the given version, if the boolean is `true` the version is included
+     *
+     * Example string representations: \
+     * `<1.0.0` '
+     * `<=1.0.0`
+     */
     data class LesserThan(val version: Version, val inclusive: Boolean) : VersionRange()
+
+    /**
+     * Matches a version greater than the given version, if the boolean is `true` the version is included
+     *
+     *  Example string representations: \
+     *  `>1.0.0` \
+     *  `>=1.0.0`
+     */
     data class GreaterThan(val version: Version, val inclusive: Boolean) : VersionRange()
+
+    /**
+     * Matches a version between two given versions, if the boolean is `true` the version is included
+     *
+     *  Example string representations: \
+     *  `1.0.0-2.0.0` (versions 1.0.0 and 2.0.0 are included) \
+     *  `1.0.0>-2.0.0`(version 1.0.0 excluded and version 2.0.0 included) \
+     *  `1.0.0-<2.0.0`(version 1.0.0 included and version 2.0.0 excluded) \
+     *  `1.0.0>-<2.0.0` (versions 1.0.0 and 2.0.0 are excluded)
+     */
     data class Between(val lower: Pair<Version, Boolean>, val upper: Pair<Version, Boolean>) :
         VersionRange()
 

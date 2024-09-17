@@ -3,6 +3,14 @@ package com.egeniq.appremoteconfig
 import kotlinx.datetime.Instant
 import org.json.JSONObject
 
+/**
+ * A schedule describes a period of time.
+ *
+ * Omitting `from` means distant past and omitting `until` means distant future. Omitting both means the schedule will never be matched.
+ *
+ * @param from `Instant` from which onwards the settings should be applied
+ * @param until `Instant` from which onwards the settings should not be applied anymore.
+ */
 data class Schedule(
     var matchNever: Boolean,
     var from: Instant?,

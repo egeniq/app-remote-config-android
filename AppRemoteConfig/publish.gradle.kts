@@ -5,7 +5,7 @@ apply(plugin = "maven-publish")
 
 val publishInfo = Properties()
 publishInfo.load(FileInputStream(File("publish.properties")))
-val libVersion = getVersionFromFile("version.txt", "0.0.0")
+val libVersion = getVersionFromFile("version.txt", "0.2.1")
 
 configure<PublishingExtension> {
     repositories {
@@ -24,6 +24,10 @@ configure<PublishingExtension> {
                 groupId = "com.egeniq"
                 artifactId = "app-remote-config"
                 version = libVersion
+
+                afterEvaluate {
+                    from(components["release"])
+                }
             }
         }
     }

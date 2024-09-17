@@ -1,5 +1,8 @@
 package com.egeniq.appremoteconfig
 
+/**
+ * Version following semantic versioning convention
+ */
 data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
     override fun compareTo(other: Version): Int {
         return when {

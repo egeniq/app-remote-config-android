@@ -3,6 +3,10 @@ package com.egeniq.appremoteconfig
 import kotlinx.datetime.Instant
 import org.json.JSONArray
 import org.json.JSONObject
+import com.goterl.lazysodium.LazySodiumAndroid
+import com.goterl.lazysodium.SodiumAndroid
+import com.goterl.lazysodium.utils.Key
+import kotlin.jvm.Throws
 
 internal fun <T> JSONArray.toList(transform: (Any) -> T): List<T> {
     val list = mutableListOf<T>()
@@ -29,14 +33,42 @@ class Config(
     /**
      * Create a config from a JSON like structure
      *
-     * @param json JSON descibing the desired configuration according to this [scheme](https://raw.githubusercontent.com/egeniq/app-remote-config/main/Schema/appremoteconfig.schema.json)
+     * @param json JSON describing the desired configuration according to this [scheme](https://raw.githubusercontent.com/egeniq/app-remote-config/main/Schema/appremoteconfig.schema.json)
      */
     constructor(json: JSONObject) : this(
         settings = json.getJSONObject("settings"),
         deprecatedKeys = if (json.has("deprecatedKeys")) json.getJSONArray("deprecatedKeys")?.toList { it as String } ?: emptyList() else emptyList(),
-        overrides = json.getJSONArray("overrides")?.toList { Override(it as JSONObject) } ?: emptyList(),
+        overrides = if (json.has("overrides")) json.getJSONArray("overrides")?.toList { Override(it as JSONObject) } ?: emptyList() else emptyList(),
         meta = if (json.has("meta")) json.getJSONObject("meta") ?: JSONObject() else JSONObject()
     )
+
+    companion object {
+        /**
+         * Create a config from JSON
+         *
+         * @param jsonString String containing JSON describing the desired configuration according to this [scheme](https://raw.githubusercontent.com/egeniq/app-remote-config/main/Schema/appremoteconfig.schema.json)
+         */
+        fun new(jsonString: String): Config {
+            val json = JSONObject(jsonString)
+            return Config(json)
+        }
+
+        private val sodiumClient = LazySodiumAndroid(SodiumAndroid())
+
+        /**
+         * Create a config from signed JSON
+         *
+         * @param signedJsonString String containing signed JSON describing the desired configuration according to this [scheme](https://raw.githubusercontent.com/egeniq/app-remote-config/main/Schema/appremoteconfig.schema.json)
+         * @param publicKey Base64 encoded public key that was used to sign the data.
+         */
+        @Throws(ConfigError::class)
+        fun new(signedJsonString: String, publicKey: String): Config {
+            val verifiedJSONString = sodiumClient.cryptoSignOpen(signedJsonString, Key.fromBase64String(publicKey))
+                ?: throw ConfigError.InvalidSignature()
+            val json = JSONObject(verifiedJSONString)
+            return Config(json)
+        }
+    }
 
     /**
      *Resolves which settings should be used by an app within its context

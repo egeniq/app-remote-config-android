@@ -1,15 +1,25 @@
 package com.egeniq.appremoteconfig
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
 /**
  * Range of versions
  */
-sealed class VersionRange {
+@Serializable(with = VersionRangeSerializer::class)
+internal sealed class VersionRange {
     /**
      * Matches an exact version
      *
      * Example string representation: \
      * `1.0.0`
      */
+
     data class Equal(val version: Version) : VersionRange()
 
     /**
@@ -42,6 +52,8 @@ sealed class VersionRange {
     data class Between(val lower: Pair<Version, Boolean>, val upper: Pair<Version, Boolean>) :
         VersionRange()
 
+    data object Invalid : VersionRange()
+
     fun contains(other: Version): Boolean {
         return when (this) {
             is Equal -> other == version
@@ -55,31 +67,15 @@ sealed class VersionRange {
                     else -> other >= lower.first && other <= upper.first
                 }
             }
+
+            is Invalid -> false
         }
     }
 
-    val rawValue: String
-        get() {
-            return when (this) {
-                is Equal -> version.rawValue
-                is LesserThan -> if (inclusive) "<=${version.rawValue}" else "<${version.rawValue}"
-                is GreaterThan -> if (inclusive) ">=${version.rawValue}" else ">${version.rawValue}"
-                is Between -> {
-                    when {
-                        !lower.second && !upper.second -> "${lower.first.rawValue}>-<${upper.first.rawValue}"
-                        !lower.second && upper.second -> "${lower.first.rawValue}>-${upper.first.rawValue}"
-                        lower.second && !upper.second -> "${lower.first.rawValue}-<${upper.first.rawValue}"
-                        else -> "${lower.first.rawValue}-${upper.first.rawValue}"
-                    }
-                }
-            }
-        }
-
     companion object {
-        @Throws(ConfigError::class)
-        fun fromRawValue(rawValue: String): VersionRange {
+        internal fun fromRawValue(rawValue: String): VersionRange {
             val parts = rawValue.split("-")
-            when (parts.size) {
+            return when (parts.size) {
                 2 -> {
                     val lower = parts[0]
                     val lowerIncluded = !lower.endsWith(">")
@@ -127,11 +123,26 @@ sealed class VersionRange {
                         }
                     }
                 }
-
-                else -> {
-                    throw ConfigError.InvalidVersionRange()
-                }
+                else -> Invalid
             }
         }
+    }
+}
+
+private class VersionRangeSerializer : KSerializer<VersionRange> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("appremoteconfig.VersionRange", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): VersionRange {
+        val value = decoder.decodeString()
+        try {
+            return VersionRange.fromRawValue(value)
+        } catch (ex: IllegalArgumentException) {
+            // can be thrown when parsing version
+            return VersionRange.Invalid
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: VersionRange) {
+        error("Not implemented")
     }
 }

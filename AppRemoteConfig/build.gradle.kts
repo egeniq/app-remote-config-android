@@ -1,12 +1,33 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlinx.serializer)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinx.serialization)
+}
+
+kotlin {
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlin.serialization.json)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+    }
 }
 
 android {
     namespace = "com.egeniq.appremoteconfig"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -24,25 +45,6 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 }
-
-dependencies {
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation("com.goterl:lazysodium-android:5.1.0@aar")
-    implementation("net.java.dev.jna:jna:5.15.0@aar")
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-}
-
-apply(from = "publish.gradle.kts")
+// TODO fix publishing
+// apply(from = "publish.gradle.kts")

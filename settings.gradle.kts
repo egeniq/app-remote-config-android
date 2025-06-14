@@ -20,5 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AppRemoteConfigProject"
-include(":app")
 include(":AppRemoteConfig")

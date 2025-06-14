@@ -1,8 +1,11 @@
 package com.egeniq.appremoteconfig
 
+import kotlinx.serialization.Serializable
+
 /**
  * Version following semantic versioning convention
  */
+@Serializable
 data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
     override fun compareTo(other: Version): Int {
         return when {
@@ -25,9 +28,6 @@ data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
         return canonical.hashCode()
     }
 
-    val rawValue: String
-        get() = "${canonical.first}.${canonical.second}.${canonical.third}"
-
     constructor(rawValue: String) : this(parseVersion(rawValue))
 
     constructor(version: OperatingSystemVersion) : this(
@@ -42,7 +42,7 @@ data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
         get() = OperatingSystemVersion(canonical.first, canonical.second, canonical.third)
 
     companion object {
-        public fun parseVersion(rawValue: String): Triple<Int, Int, Int> {
+        private fun parseVersion(rawValue: String): Triple<Int, Int, Int> {
             val trimmedValue = rawValue.trimStart { !"1234567890.".contains(it) }
             val parts = trimmedValue.split(".").mapNotNull { it.toIntOrNull() }.take(3)
             require(parts.isNotEmpty()) { "Invalid version format" }
@@ -52,6 +52,7 @@ data class Version(val canonical: Triple<Int, Int, Int>) : Comparable<Version> {
     }
 }
 
+@Serializable
 data class OperatingSystemVersion(
     val majorVersion: Int,
     val minorVersion: Int,

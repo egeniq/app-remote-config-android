@@ -1,17 +1,23 @@
 package com.egeniq.appremoteconfig
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import junit.framework.TestCase.assertEquals
 import kotlinx.datetime.Instant
-import org.json.JSONObject
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import org.junit.Test
-import org.junit.Assert.*
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
-class AppRemoteConfigTests {
+class ConfigTest {
+
+    @Serializable
+    @JsonIgnoreUnknownKeys
+    data class TestFooIntSetting(val foo: Int)
 
     @Test
-    fun parsing() {
+    fun `parses config from string`() {
+        @Serializable
+        @JsonIgnoreUnknownKeys
+        data class Settings(val foo: Boolean, val bar: String)
+
         val jsonString = """
         {
             "settings": {
@@ -80,11 +86,10 @@ class AppRemoteConfigTests {
             }
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            Settings.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -93,11 +98,9 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings["foo"] as Boolean
-        assertEquals(false, foo)
 
-        val bar = settings["bar"] as String
-        assertEquals("hello world", bar)
+        assertEquals(false, settings.foo)
+        assertEquals("hello world", settings.bar)
     }
 
     @Test
@@ -121,11 +124,10 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -133,8 +135,7 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings.getInt("foo")
-        assertEquals(2, foo)
+        assertEquals(2, settings.foo)
     }
 
     @Test
@@ -158,70 +159,66 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            1, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(1, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+
+        assertEquals(
+            1, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(1, foo)
-        }
+            ).foo
+        )
     }
 
     @Test
@@ -255,202 +252,64 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            1, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.6.9"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(1, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.7.0"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("0.8.123"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+
+        assertEquals(
+            3, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(3, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            1, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.1"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(1, foo)
-        }
-    }
-
-    @Test
-    fun versionParsing() {
-        try {
-            val version = Version("1.0.0")
-            assertEquals("1.0.0", version.rawValue)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val version = Version("1.0")
-            assertEquals("1.0.0", version.rawValue)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val version = Version("1")
-            assertEquals("1.0.0", version.rawValue)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val version = Version("1.0.0-test")
-            assertEquals("1.0.0", version.rawValue)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val version = Version(" 1.0.0 ")
-            assertEquals("1.0.0", version.rawValue)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    @Test
-    fun versionRangeParsing() {
-        try {
-            val versionRange = VersionRange.fromRawValue("1.0.0")
-            assertEquals("1.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertTrue(versionRange.contains(Version("1.0.0")))
-            assertFalse(versionRange.contains(Version("1.0.1")))
-            assertFalse(versionRange.contains(Version("1.9.0")))
-            assertFalse(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue("1.0-2.0")
-            assertEquals("1.0.0-2.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertTrue(versionRange.contains(Version("1.0.0")))
-            assertTrue(versionRange.contains(Version("1.0.1")))
-            assertTrue(versionRange.contains(Version("1.9.0")))
-            assertTrue(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue(">1")
-            assertEquals(">1.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertFalse(versionRange.contains(Version("1.0.0")))
-            assertTrue(versionRange.contains(Version("1.0.1")))
-            assertTrue(versionRange.contains(Version("1.9.0")))
-            assertTrue(versionRange.contains(Version("2.0.0")))
-            assertTrue(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue("<=1.0.0")
-            assertEquals("<=1.0.0", versionRange.rawValue)
-            assertTrue(versionRange.contains(Version("0.9.9")))
-            assertTrue(versionRange.contains(Version("1.0.0")))
-            assertFalse(versionRange.contains(Version("1.0.1")))
-            assertFalse(versionRange.contains(Version("1.9.0")))
-            assertFalse(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue("1.0.0>-<2.0.0")
-            assertEquals("1.0.0>-<2.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertFalse(versionRange.contains(Version("1.0.0")))
-            assertTrue(versionRange.contains(Version("1.0.1")))
-            assertTrue(versionRange.contains(Version("1.9.0")))
-            assertFalse(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue("1.0.0>-2.0.0")
-            assertEquals("1.0.0>-2.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertFalse(versionRange.contains(Version("1.0.0")))
-            assertTrue(versionRange.contains(Version("1.0.1")))
-            assertTrue(versionRange.contains(Version("1.9.0")))
-            assertTrue(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        try {
-            val versionRange = VersionRange.fromRawValue("1.0.0-<2.0.0")
-            assertEquals("1.0.0-<2.0.0", versionRange.rawValue)
-            assertFalse(versionRange.contains(Version("0.9.9")))
-            assertTrue(versionRange.contains(Version("1.0.0")))
-            assertTrue(versionRange.contains(Version("1.0.1")))
-            assertTrue(versionRange.contains(Version("1.9.0")))
-            assertFalse(versionRange.contains(Version("2.0.0")))
-            assertFalse(versionRange.contains(Version("2.0.1")))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            ).foo
+        )
     }
 
     @Test
@@ -475,20 +334,18 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
         )
-
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 
     @Test
@@ -516,9 +373,7 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
-        val config = Config(json)
+        val config = Config(jsonString)
         val dates = config.relevantResolutionDates(
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -559,9 +414,8 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
 
-        val config = Config(json)
+        val config = Config(jsonString)
         val dates = config.relevantResolutionDates(
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -598,34 +452,31 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
 
-        runCatching {
-            val settings = config.resolve(
+        assertEquals(
+            2, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.DEBUG
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(2, foo)
-        }
+            ).foo
+        )
 
-        runCatching {
-            val settings = config.resolve(
+
+        assertEquals(
+            1, config.resolve(
+                TestFooIntSetting.serializer(),
                 date = date,
                 platform = Platform.IOS_IPHONE,
                 platformVersion = OperatingSystemVersion(16, 0, 1),
                 appVersion = Version("1.0.0"),
                 buildVariant = BuildVariant.RELEASE
-            )
-            val foo = settings.getInt("foo")
-            assertEquals(1, foo)
-        }
+            ).foo
+        )
     }
 
     @Test
@@ -649,19 +500,17 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
         )
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 
     @Test
@@ -686,11 +535,11 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -698,8 +547,7 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 
     @Test
@@ -723,11 +571,11 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
 
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -735,8 +583,7 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 
     @Test
@@ -760,11 +607,10 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
@@ -772,8 +618,7 @@ class AppRemoteConfigTests {
             buildVariant = BuildVariant.RELEASE
         )
 
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 
     @Test
@@ -797,19 +642,16 @@ class AppRemoteConfigTests {
             ]
         }
         """
-        val json = JSONObject(jsonString)
-
         val date = Instant.fromEpochMilliseconds(0)
-        val config = Config(json)
+        val config = Config(jsonString)
         val settings = config.resolve(
+            TestFooIntSetting.serializer(),
             date = date,
             platform = Platform.IOS_IPHONE,
             platformVersion = OperatingSystemVersion(16, 0, 1),
             appVersion = Version("1.0.0"),
             buildVariant = BuildVariant.RELEASE
         )
-
-        val foo = settings.getInt("foo")
-        assertEquals(1, foo)
+        assertEquals(1, settings.foo)
     }
 }

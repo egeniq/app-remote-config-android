@@ -8,4 +8,43 @@ General info about AppRemoteConfig can be found [here](https://github.com/egeniq
 
 ### Build Instructions
 
-WORK IN PROGRESS
+To build the library and install it to your local Maven repository for testing:
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+To build all platform artifacts (JVM and iOS):
+
+```bash
+./gradlew assemble
+```
+
+### Importing the Dependency
+
+#### 1. Add the Repository
+
+In your project's `settings.gradle.kts` (or `build.gradle.kts`):
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/egeniq/app-remote-config-android")
+        credentials {
+            username = "YOUR_GITHUB_USERNAME"
+            password = "YOUR_GITHUB_TOKEN" // A GitHub Personal Access Token with 'read:packages' scope
+        }
+    }
+}
+```
+
+#### 2. Add the Dependency
+
+In your Android app's `build.gradle.kts` (or in the `commonMain` source set of a Kotlin Multiplatform project):
+
+```kotlin
+dependencies {
+    implementation("com.egeniq:AppRemoteConfig:0.4.1")
+}
+```

@@ -24,4 +24,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "AppRemoteConfigProject"
 include(":AppRemoteConfig")
-include(":lib")

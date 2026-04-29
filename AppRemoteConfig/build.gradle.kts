@@ -1,48 +1,78 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlinx.serializer)
+    `maven-publish`
 }
 
-android {
-    namespace = "com.egeniq.appremoteconfig"
-    compileSdk = 34
+val publishInfo = Properties()
+val publishPropertiesFile = rootProject.file("publish.properties")
+if (publishPropertiesFile.exists()) {
+    publishInfo.load(FileInputStream(publishPropertiesFile))
+}
 
-    defaultConfig {
-        minSdk = 24
+group = "com.egeniq"
+version = getVersionFromFile("version.txt", "0.2.1")
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
+kotlin {
+    withSourcesJar()
+    jvm()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    jvmToolchain(21)
+
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.kotlinx.datetime)
+            api(libs.kotlin.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/egeniq/app-remote-config-android")
+            credentials {
+                username = publishInfo["token.name"]?.toString() ?: ""
+                password = publishInfo["token.value"]?.toString() ?: ""
+            }
+        }
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    publications.withType<MavenPublication>().configureEach {
+        // artifactId is automatically set for each target (e.g. AppRemoteConfig-jvm)
+        pom {
+            name = "App Remote Config"
+            description = "A library that parses remote config values and provides them as a Kotlin API."
+            url = "https://github.com/egeniq/app-remote-config-android"
+            licenses {
+                license {
+                    name = "MIT License"
+                    url = "https://github.com/egeniq/app-remote-config-android/blob/main/LICENSE"
+                }
+            }
+        }
     }
 }
 
-dependencies {
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation("com.goterl:lazysodium-android:5.1.0@aar")
-    implementation("net.java.dev.jna:jna:5.15.0@aar")
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+fun getVersionFromFile(
+    path: String,
+    defaultValue: String,
+): String {
+    val versionFile = file(path)
+    return if (versionFile.exists()) {
+        versionFile.readText().trim()
+    } else {
+        defaultValue
+    }
 }
-
-apply(from = "publish.gradle.kts")

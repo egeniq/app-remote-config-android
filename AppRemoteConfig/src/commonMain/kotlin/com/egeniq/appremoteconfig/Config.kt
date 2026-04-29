@@ -113,7 +113,7 @@ fun <T> Config.meta(deserializer: KSerializer<T>): T? {
  * A simple but effective way to manage apps remotely. A simple configuration file that is easy to maintain and host, yet provides important flexibility to specify settings based on your needs.
  *
  * @property settings The default settings that an app should use.
- * @property deprecatedKeys Keys that are no longer in use, but may still be used by overrides to accomodate older versions of an app.
+ * @property deprecatedKeys Keys that are no longer in use, but may still be used by overrides to accommodate older versions of an app.
  * @property overrides Overrides containing the settings to apply when they match and/or are scheduled. Applied from top to bottom.
  * @property meta Store metadata such as author or last updated date here.
  */

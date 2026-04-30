@@ -20,6 +20,12 @@ To build all platform artifacts (JVM and iOS):
 ./gradlew assemble
 ```
 
+To publish all library artifacts to github packages repository use:
+
+```bash
+./gradlew publishAllPublicationsToGitHubPackagesRepository
+```
+
 ### Importing the Dependency
 
 #### 1. Add the Repository
@@ -45,6 +51,6 @@ In your Android app's `build.gradle.kts` (or in the `commonMain` source set of a
 
 ```kotlin
 dependencies {
-    implementation("com.egeniq:AppRemoteConfig:0.4.1")
+    implementation("com.egeniq:app-remote-config:0.4.2")
 }
 ```

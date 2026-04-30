@@ -27,7 +27,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.kotlinx.datetime)
             api(libs.kotlin.serialization.json)
         }
         commonTest.dependencies {
@@ -49,8 +48,17 @@ publishing {
         }
     }
 
+    // This applies common metadata to ALL publications (KMP targets + relocation)
     publications.withType<MavenPublication>().configureEach {
-        // artifactId is automatically set for each target (e.g. AppRemoteConfig-jvm)
+        // Force the artifactId to match the repo name expected by GitHub
+        // For the root KMP publication, we use 'app-remote-config'
+        // Target-specific ones will be 'app-remote-config-jvm', etc.
+        if (name == "kotlinMultiplatform") {
+            artifactId = "app-remote-config"
+        } else if (name.startsWith("jvm") || name.startsWith("ios")) {
+            // For targets, you might want to keep them consistent
+            artifactId = "app-remote-config-${name.lowercase()}"
+        }
         pom {
             name = "App Remote Config"
             description = "A library that parses remote config values and provides them as a Kotlin API."
@@ -60,6 +68,18 @@ publishing {
                     name = "MIT License"
                     url = "https://github.com/egeniq/app-remote-config-android/blob/main/LICENSE"
                 }
+            }
+            developers {
+                developer {
+                    id = "DawnTech"
+                    name = "Dawn Technology"
+                    email = "info@dawn.tech"
+                }
+            }
+            scm {
+                connection = "scm:git:git://github.com/egeniq/app-remote-config-android.git"
+                developerConnection = "scm:git:ssh://github.com:egeniq/app-remote-config-android.git"
+                url = "https://github.com/egeniq/app-remote-config-android"
             }
         }
     }

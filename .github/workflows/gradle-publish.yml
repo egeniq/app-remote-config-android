@@ -1,44 +1,57 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
-
 name: Gradle Package
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
+    paths:
+      - 'AppRemoteConfig/version.txt'
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
 
-    - name: Build with Gradle
-      run: ./gradlew assemble
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-    # the publishing section of your build.gradle
-    - name: Publish to GitHub Packages
-      run: ./gradlew publishAllPublicationsToGitHubPackagesRepository
-      env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=$(cat AppRemoteConfig/version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Build with Gradle
+        run: ./gradlew assemble
+
+      - name: Publish to GitHub Packages
+        run: |
+          cat > publish.properties <<'EOF'
+          token.name=${{ github.actor }}
+          token.value=${{ secrets.GITHUB_TOKEN }}
+          EOF
+          ./gradlew publishAllPublicationsToGitHubPackagesRepository
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: v${{ steps.get_version.outputs.VERSION }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

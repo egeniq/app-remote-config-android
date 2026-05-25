@@ -77,8 +77,8 @@ publishing {
                 }
             }
             scm {
-                connection = "scm:git:git://github.com/egeniq/app-remote-config-android.git"
-                developerConnection = "scm:git:ssh://github.com:egeniq/app-remote-config-android.git"
+                connection = "scm:git:https://github.com/egeniq/app-remote-config-android.git"
+                developerConnection = "scm:git:ssh://git@github.com/egeniq/app-remote-config-android.git"
                 url = "https://github.com/egeniq/app-remote-config-android"
             }
         }

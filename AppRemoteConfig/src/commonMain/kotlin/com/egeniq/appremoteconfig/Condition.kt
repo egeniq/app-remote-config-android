@@ -61,7 +61,7 @@ internal data class Condition(
             return false
         }
 
-        if (variant != null && this.variant != null && !this.variant.contains(variant)) {
+        if (this.variant != null && (variant == null || !this.variant.contains(variant))) {
             return false
         }
 

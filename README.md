@@ -6,8 +6,9 @@ Create a simple configuration file that is easy to maintain and host, yet provid
 
 General info about AppRemoteConfig can be found [here](https://github.com/egeniq/app-remote-config).
 
-### Build Instructions
+### Build & Publishing Instructions
 
+#### Local Development
 To build the library and install it to your local Maven repository for testing:
 
 ```bash
@@ -19,6 +20,25 @@ To build all platform artifacts (JVM and iOS):
 ```bash
 ./gradlew assemble
 ```
+
+#### Publishing to GitHub Packages
+To publish the library to GitHub Packages, you need to provide your GitHub credentials.
+
+1. Create a file named `publish.properties` in the root directory of the project.
+2. Add your GitHub username and a Personal Access Token (PAT) with `write:packages` scope:
+
+```properties
+token.name=YOUR_GITHUB_USERNAME
+token.value=YOUR_GITHUB_TOKEN
+```
+
+3. Run the publishing task:
+
+```bash
+./gradlew publishAllPublicationsToGitHubPackagesRepository
+```
+
+> **Note:** The `publish.properties` file is excluded from Git by `.gitignore` to keep your credentials safe.
 
 ### Importing the Dependency
 
@@ -45,6 +65,6 @@ In your Android app's `build.gradle.kts` (or in the `commonMain` source set of a
 
 ```kotlin
 dependencies {
-    implementation("com.egeniq:AppRemoteConfig:0.4.1")
+    implementation("com.egeniq:app-remote-config:0.4.2")
 }
 ```

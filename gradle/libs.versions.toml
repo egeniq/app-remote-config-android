@@ -4,7 +4,6 @@ kotlin = "2.3.20"
 
 
 [libraries]
-kotlinx-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1"
 kotlin-serialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 

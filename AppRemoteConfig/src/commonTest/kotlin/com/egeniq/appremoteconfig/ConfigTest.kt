@@ -619,4 +619,68 @@ class ConfigTest {
         )
         assertEquals(1, settings.foo)
     }
+
+    @Test
+    fun testVariantConditionDoesNotMatchWhenNoVariant() {
+        @Serializable
+        @JsonIgnoreUnknownKeys
+        data class Settings(val foo: Boolean)
+
+        val jsonString = """
+        {
+            "settings": {
+                "foo": true
+            },
+            "overrides": [
+                {
+                    "matching": [
+                        {
+                            "variant": "AppStore"
+                        }
+                    ],
+                    "settings": {
+                        "foo": false
+                    }
+                }
+            ]
+        }
+        """
+        val date = Instant.fromEpochMilliseconds(0)
+        val config = Config(jsonString)
+
+        // No variant provided: the override requiring "AppStore" variant should NOT match
+        val settingsNoVariant = config.resolve(
+            deserializer = Settings.serializer(),
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            buildVariant = BuildVariant.RELEASE
+        )
+        assertEquals(true, settingsNoVariant.foo, "No variant provided: the override requiring 'AppStore' variant should NOT match")
+
+        // Correct variant provided: the override should match
+        val settingsWithVariant = config.resolve(
+            deserializer = Settings.serializer(),
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            variant = "AppStore",
+            buildVariant = BuildVariant.RELEASE
+        )
+        assertEquals(false, settingsWithVariant.foo, "Correct variant provided: the override should match")
+
+        // Wrong variant provided: the override should NOT match
+        val settingsWrongVariant = config.resolve(
+            deserializer = Settings.serializer(),
+            date = date,
+            platform = Platform.IOS_IPHONE,
+            platformVersion = OperatingSystemVersion(16, 0, 1),
+            appVersion = Version("1.0.0"),
+            variant = "TestFlight",
+            buildVariant = BuildVariant.RELEASE
+        )
+        assertEquals(true, settingsWrongVariant.foo, "Wrong variant provided: the override should NOT match")
+    }
 }
